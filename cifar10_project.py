@@ -73,15 +73,21 @@ def build_baseline_model() -> keras.Model:
     return model
 
 def build_cnn_model() -> keras.Model:
-    """Build a simple CNN model for CIFAR10 dataset."""
+    """Build a simple CNN model with Batch Normalization and Dropout."""
     model = keras.Sequential([
         keras.layers.Input(shape=(32, 32, 3)),
+        
         keras.layers.Conv2D(32, (3, 3), activation="relu", padding="same"),
+        keras.layers.BatchNormalization(), # Added for stability
         keras.layers.MaxPooling2D(pool_size=2),
+        
         keras.layers.Conv2D(64, (3, 3), activation="relu", padding="same"),
+        keras.layers.BatchNormalization(), # Added for stability
         keras.layers.MaxPooling2D(pool_size=2),
+        
         keras.layers.Flatten(),
         keras.layers.Dense(100, activation="relu"),
+        keras.layers.Dropout(0.3), # Added to prevent overfitting
         keras.layers.Dense(10, activation="softmax")
     ])
 
@@ -95,14 +101,24 @@ def build_cnn_model() -> keras.Model:
 
 def train_model(model: keras.Model, x_train: np.ndarray, y_train: np.ndarray,
                 x_valid: np.ndarray, y_valid: np.ndarray, model_name: str):
-    """Train model and save learning curve plot."""
+    """Train model with a Learning Rate Scheduler and save learning curve plot."""
     print(f"\nTraining {model_name}...")
+    
+    # Callback to reduce learning rate when progress plateaus
+    lr_scheduler = keras.callbacks.ReduceLROnPlateau(
+        monitor='val_loss', 
+        factor=0.5, 
+        patience=2, 
+        verbose=1
+    )
+
     history = model.fit(
         x_train,
         y_train,
         epochs=EPOCHS,
         batch_size=BATCH_SIZE,
         validation_data=(x_valid, y_valid),
+        callbacks=[lr_scheduler], # Integrated the new callback
         verbose=1
     )
 
@@ -115,6 +131,7 @@ def plot_learning_curves(history, model_name: str):
     history_dict = history.history
     epochs_range = range(1, len(history.history["loss"]) + 1)
 
+    plt.figure(figsize=(8, 5))
     plt.plot(epochs_range, history_dict["accuracy"], label="Training accuracy")
     plt.plot(epochs_range, history_dict["val_accuracy"], label="Validation accuracy")
     plt.xlabel("Epoch")
