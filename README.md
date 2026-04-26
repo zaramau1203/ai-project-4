@@ -1,6 +1,6 @@
 # CIFAR-10 Image Classification – CAP 4630 Project 4
 
-**Team Members:** Michael Rivera, Zharah
+**Team Members:** Michael, Zharah
 
 ## Overview
 
