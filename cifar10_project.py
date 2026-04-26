@@ -155,6 +155,27 @@ def plot_learning_curves(history, model_name: str):
     plt.savefig(os.path.join(FIGURES_DIR, f"{model_name.lower()}_loss.png"), dpi=300)
     plt.close()
 
+def plot_predictions(model: keras.Model, x_test: np.ndarray, y_test: np.ndarray, model_name: str) -> None:
+    """Save example predictions from trained model."""
+    predictions = model.predict(x_test[:10], verbose=0)
+    predicted_labels = np.argmax(predictions, axis=1)
+
+    plt.figure(figsize=(12, 5))
+
+    for i in range(10):
+        plt.subplot(2, 5, i + 1)
+        plt.imshow(x_test[i])
+
+        pred_name = CLASS_NAMES[predicted_labels[i]]
+        true_name = CLASS_NAMES[y_test[i]]
+
+        plt.title(f"Prediction: {pred_name}\nTrue: {true_name}", fontsize=9)
+        plt.axis("off")
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(FIGURES_DIR, f"{model_name.lower()}_predictions.png"), dpi=300)
+    plt.close()
+
 def evaluate_model(model: keras.Model, x_test: np.ndarray, y_test: np.ndarray, model_name: str):
     """Evaluate trained model and return its test metrics."""
     loss, accuracy = model.evaluate(x_test, y_test, verbose=0)
@@ -190,10 +211,12 @@ def main() -> None:
     baseline_model = build_baseline_model()
     train_model(baseline_model, x_train, y_train, x_valid, y_valid, "Baseline")
     baseline_results = evaluate_model(baseline_model, x_test, y_test, "Baseline")
+    plot_predictions(baseline_model, x_test, y_test, "Baseline")
 
     cnn_model = build_cnn_model()
     train_model(cnn_model, x_train, y_train, x_valid, y_valid, "CNN")
     cnn_results = evaluate_model(cnn_model, x_test, y_test, "CNN")
+    plot_predictions(cnn_model, x_test, y_test, "CNN")
 
     save_results([baseline_results, cnn_results])
 
