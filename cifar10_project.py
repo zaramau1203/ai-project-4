@@ -47,7 +47,7 @@ def plot_sample_images(x_train: np.ndarray, y_train: np.ndarray) -> None:
     for i in range(10):
         plt.subplot(2, 5, i + 1)
         plt.imshow(x_train[i])
-        plt.title(CLASS_NAMES[y_train[i]])
+        plt.title(str(CLASS_NAMES[y_train[i]]))
         plt.axis("off")
 
     plt.tight_layout()
